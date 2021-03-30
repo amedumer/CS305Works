@@ -1,0 +1,109 @@
+%{
+char* substr(const char *src, int m, int n)
+{
+    int len = n - m;
+    int i;
+    char *dest = (char*)malloc(sizeof(char) * (len + 1));
+
+    for (i = m; i < n && (*(src + i) != '\0'); i++)
+    {
+        *dest = *(src + i);
+        dest++;
+    }
+    *dest = '\0';
+    return dest - len;
+}
+int noOfLines = 1;
+char* tmp;
+char value[200];
+int i,j;
+%}
+
+tNUM 	-?[0-9]+(\.[0-9]+)?
+tFUNC 	\"Function\"
+tIDENT 	\"[a-zA-Z_]+[a-zA-Z0-9_]*\"
+tSTRING '.*?'
+tRETURN \"Return\"
+
+%%
+{tNUM} {
+	for(i=0;i<sizeof(value);i++) {
+		value[i] = '\0'
+		;}
+	if (yyleng == 1 && yytext[0] != '-'){ value[0] = yytext[0];}
+	else{
+            int beDeleted = 1, isDotExist = 0,firstZero = 0;
+            for(i=0,j=0;i<yyleng;i++){
+		if(yytext[i] == '.'){isDotExist = 1;}
+                if((beDeleted == 0) || (yytext[i] !='0')){
+
+                    value[j] = yytext[i];
+
+		    if (yytext[i] != '-' ){ beDeleted = 0;}
+                    else { beDeleted = 1;}
+ 	               j++;}
+		else if(yytext[i+1] == '.') {value[j] = yytext[i]; j++;}
+        	    }
+		
+		if(isDotExist){
+			for(i=j-1;i>=0;i--) {
+		   		if(value[i-1] != '.' && value[i] == '0') {value[i] = '\0';}
+		   		else {break;}
+		}
+             };
+}
+
+	if (value[i] == '.')
+		value[i+1] = '0';
+
+	 printf("%d tNUM (%s) (%s)\n",noOfLines,yytext,value);
+}
+"]" 		printf("%d tRBRAC\n",noOfLines);
+"[" 		printf("%d tLBRAC\n",noOfLines);
+\n  		noOfLines++;
+\"Set\" 	printf("%d tSET\n",noOfLines);
+" "
+\"Print\" 	printf("%d tPRINT\n",noOfLines);
+{tFUNC} 	printf("%d tFUNCTION\n",noOfLines);
+, 		printf("%d tCOMMA\n",noOfLines);
+\"For\" 	printf("%d tFOR\n",noOfLines);
+\"Get\" 	printf("%d tGET\n",noOfLines);
+['](\n|[^'\\\n]|\\(.|\n))*[']	 {
+printf("%d tSTRING (%s)\n",noOfLines,substr(yytext,1,yyleng-1));
+for(i = 0; i < yyleng; i++){
+	if(yytext[i]=='\n'){
+		noOfLines++;
+}
+}
+
+}
+
+\"Return\" 	printf("%d tRETURN\n",noOfLines);
+\"If\" 		printf("%d tIF\n",noOfLines);
+{tIDENT} 	printf("%d tIDENT (%s)\n",noOfLines,substr(yytext,1,yyleng-1));
+
+
+\"
+'
+\.
+
+\"-\" 	printf("%d tMINUS\n",noOfLines);
+\"\+\" 	printf("%d tPLUS\n",noOfLines);
+\"\*\" 	printf("%d tMUL\n",noOfLines);
+\"==\" 	printf("%d tEQUALITY\n",noOfLines);
+\"\/\" 	printf("%d tDIV\n",noOfLines);
+\">\" 	printf("%d tGT\n",noOfLines);
+\"<\" 	printf("%d tLT\n",noOfLines);
+\"<=\" 	printf("%d tLEQ\n",noOfLines);
+\">=\" 	printf("%d tGEQ\n",noOfLines);
+\"--\" 	printf("%d tDEC\n",noOfLines);
+\"\+\+\" printf("%d tINC\n",noOfLines); 
+
+[\*-\+a-zA-Z_]+
+\t
+%%
+
+int main(){
+    yylex();
+    return(0);
+}
