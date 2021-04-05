@@ -498,8 +498,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "hw2.flx"
-#line 2 "hw2.flx"
+#line 1 "ahmetomer-hw2.flx"
+#line 2 "ahmetomer-hw2.flx"
 #include "ahmetomer-hw2.tab.h" 
 #line 505 "lex.yy.c"
 
@@ -683,7 +683,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 4 "hw2.flx"
+#line 4 "ahmetomer-hw2.flx"
 
 
 #line 690 "lex.yy.c"
@@ -772,104 +772,104 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 6 "hw2.flx"
+#line 6 "ahmetomer-hw2.flx"
 return tSTRING;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 9 "hw2.flx"
+#line 9 "ahmetomer-hw2.flx"
 return tGET;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 10 "hw2.flx"
+#line 10 "ahmetomer-hw2.flx"
 return tSET;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 11 "hw2.flx"
+#line 11 "ahmetomer-hw2.flx"
 return tFUNCTION;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 12 "hw2.flx"
+#line 12 "ahmetomer-hw2.flx"
 return tPRINT;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 13 "hw2.flx"
+#line 13 "ahmetomer-hw2.flx"
 return tIF;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 14 "hw2.flx"
+#line 14 "ahmetomer-hw2.flx"
 return tRETURN;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 16 "hw2.flx"
+#line 16 "ahmetomer-hw2.flx"
 return tINC;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 17 "hw2.flx"
+#line 17 "ahmetomer-hw2.flx"
 return tDEC;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 18 "hw2.flx"
+#line 18 "ahmetomer-hw2.flx"
 return tGT;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 19 "hw2.flx"
+#line 19 "ahmetomer-hw2.flx"
 return tEQUALITY;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 20 "hw2.flx"
+#line 20 "ahmetomer-hw2.flx"
 return tLT;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 21 "hw2.flx"
+#line 21 "ahmetomer-hw2.flx"
 return tLEQ;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 22 "hw2.flx"
+#line 22 "ahmetomer-hw2.flx"
 return tGEQ;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 24 "hw2.flx"
+#line 24 "ahmetomer-hw2.flx"
 return tIDENT;
 	YY_BREAK
 case 16:
-#line 27 "hw2.flx"
+#line 27 "ahmetomer-hw2.flx"
 case 17:
-#line 28 "hw2.flx"
+#line 28 "ahmetomer-hw2.flx"
 case 18:
-#line 29 "hw2.flx"
+#line 29 "ahmetomer-hw2.flx"
 case 19:
 YY_RULE_SETUP
-#line 29 "hw2.flx"
+#line 29 "ahmetomer-hw2.flx"
 return tNUM; 
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 31 "hw2.flx"
+#line 31 "ahmetomer-hw2.flx"
 
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 32 "hw2.flx"
+#line 32 "ahmetomer-hw2.flx"
 return yytext[0];
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 34 "hw2.flx"
+#line 34 "ahmetomer-hw2.flx"
 ECHO;
 	YY_BREAK
 #line 876 "lex.yy.c"
@@ -1866,7 +1866,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 34 "hw2.flx"
+#line 34 "ahmetomer-hw2.flx"
 
 
 
