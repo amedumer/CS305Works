@@ -1,0 +1,11 @@
+[
+	["Set", "SumFunc",
+        ["Function", ["X","Y"],
+          [
+            ["Set", "Z", ["+" , ["Get", "X"], ["Get", "Y"]]]
+
+            ["Return", ["Get", "Z"]]
+          ]
+        ]
+    ]
+]

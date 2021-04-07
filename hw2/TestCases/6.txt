@@ -1,0 +1,3 @@
+[
+	["Set", "OnePlusTwo", ["Get", "SumFunc", [1,2]]]
+]
