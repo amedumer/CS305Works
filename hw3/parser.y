@@ -9,7 +9,7 @@
 void yyerror (const char *s) 
 {}
 
-typedef enum { STR, INT, DBL, ERR } itemType;
+typedef enum { STR, INT, DBL, ERR ,GET} itemType;
 
 typedef union 
 {
@@ -48,6 +48,7 @@ char* substr(const char *src, int m, int n);
 %type <str> tSTRING;
 %type <node> expr;
 %type<node> operation;
+%type<node> setStmt;
 
 %%
 prog:		'[' stmtlst ']'
@@ -82,7 +83,21 @@ getExpr:	'[' tGET ',' tIDENT ',' '[' exprList ']' ']'
 		| '[' tGET ',' tIDENT ']'
 ;
 
-setStmt:	'[' tSET ',' tIDENT ',' expr ']'
+setStmt:	'[' tSET ',' tIDENT ',' expr ']' {
+
+			if($6->thisNodeType == ERR){
+					printf("Type mismatch on %i\n",line);
+				}
+				else if($6->thisNodeType == INT){
+					printf("Result of expression on %i is (%i)\n",line,$6->exprNodePtr->inum);
+				}
+				else if($6->thisNodeType == DBL){
+					printf("Result of expression on %i is (%g)\n",line,$6->exprNodePtr->dnum);
+				}
+				else if($6->thisNodeType == STR){
+					printf("Result of expression on %i is (%s)\n",line,$6->exprNodePtr->sval);
+				}
+}
 ;
 
 if:		'[' tIF ',' condition ',' '[' stmtlst ']' ']'
@@ -95,8 +110,13 @@ print:		'[' tPRINT ',' '[' expr ']' ']'
 
 
 operation:	'[' tADD ',' expr ',' expr ']' {
+	if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
-	if($4->thisNodeType == INT && $6->thisNodeType == INT){
+				node->thisNodeType = GET;
+
+				$$ = node;}
+
+	else if($4->thisNodeType == INT && $6->thisNodeType == INT){
 		//printf("operation || int and int found => %i  %i \n",$4->exprNodePtr->inum, $6->exprNodePtr->inum);
 
 		Node * node = (Node *) malloc(sizeof(Node));
@@ -179,9 +199,248 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 	}
 	
 }
-		| '[' tSUB ',' expr ',' expr ']' 
-		| '[' tMUL ',' expr ',' expr ']' 
-		| '[' tDIV ',' expr ',' expr ']' 
+		| '[' tSUB ',' expr ',' expr ']' {
+			if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = GET;
+
+				$$ = node;}
+				
+		else if($4->thisNodeType == INT && $6->thisNodeType == INT){
+
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->inum = $4->exprNodePtr->inum - $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = INT;
+
+			$$ = node;
+
+	}
+
+	else if($4->thisNodeType == DBL && $6->thisNodeType == DBL){
+		//printf("operation || dbl and dbl found => %g  %g \n",$4->exprNodePtr->dnum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum - $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+
+	else if(($4->thisNodeType == DBL && $6->thisNodeType == INT)){
+		//printf("operation || dbl and int found => %f  %i \n",$4->exprNodePtr->dnum, $6->exprNodePtr->inum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum - $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	else if(($4->thisNodeType == INT && $6->thisNodeType == DBL)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->inum - $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+
+	else{
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			$$ = node;
+	}
+		}
+		| '[' tMUL ',' expr ',' expr ']' {
+			if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = GET;
+
+				$$ = node;}
+			else if($4->thisNodeType == INT && $6->thisNodeType == INT){
+		//printf("operation || int and int found => %i  %i \n",$4->exprNodePtr->inum, $6->exprNodePtr->inum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->inum = $4->exprNodePtr->inum * $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = INT;
+
+			$$ = node;
+
+	}
+
+	else if($4->thisNodeType == DBL && $6->thisNodeType == DBL){
+		//printf("operation || dbl and dbl found => %g  %g \n",$4->exprNodePtr->dnum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum * $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+
+	else if(($4->thisNodeType == DBL && $6->thisNodeType == INT)){
+		//printf("operation || dbl and int found => %f  %i \n",$4->exprNodePtr->dnum, $6->exprNodePtr->inum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum * $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	else if(($4->thisNodeType == INT && $6->thisNodeType == DBL)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->inum * $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	else if(($4->thisNodeType == INT && $6->thisNodeType == STR)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+
+			int i;
+			char* str = (char*) malloc(sizeof(char));
+
+			for(i = 0; i < $4->exprNodePtr->inum; i++){
+				str = strcat(str, $6->exprNodePtr->sval);;
+			} 
+
+			exprnode->sval = str;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = STR;
+
+			$$ = node;
+
+	}
+
+	else{
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			$$ = node;
+	}
+		}
+		| '[' tDIV ',' expr ',' expr ']' {
+			if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = GET;
+
+				$$ = node;}
+			else if($4->thisNodeType == INT && $6->thisNodeType == INT){
+		//printf("operation || int and int found => %i  %i \n",$4->exprNodePtr->inum, $6->exprNodePtr->inum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->inum = $4->exprNodePtr->inum / $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = INT;
+
+			$$ = node;
+
+	}
+
+	else if($4->thisNodeType == DBL && $6->thisNodeType == DBL){
+		//printf("operation || dbl and dbl found => %g  %g \n",$4->exprNodePtr->dnum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum / $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+
+	else if(($4->thisNodeType == DBL && $6->thisNodeType == INT)){
+		//printf("operation || dbl and int found => %f  %i \n",$4->exprNodePtr->dnum, $6->exprNodePtr->inum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum / $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	else if(($4->thisNodeType == INT && $6->thisNodeType == DBL)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->inum / $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	
+
+	else{
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			$$ = node;
+	}
+		}
 ;
 
 
@@ -230,7 +489,16 @@ expr:		tNUM {
 
 				$$ = node;
 			}
-			| getExpr | function | operation
+			| getExpr {
+
+				Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = GET;
+
+				$$ = node;
+
+			}
+			| function | operation
 			
 				| condition
 ;
