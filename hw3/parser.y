@@ -9,7 +9,7 @@
 void yyerror (const char *s) 
 {}
 
-typedef enum { STR, INT, DBL, ERR ,GET} itemType;
+typedef enum { STR, INT, DBL, ERR ,GET, CHK} itemType;
 
 typedef union 
 {
@@ -30,6 +30,7 @@ typedef struct Node
 extern int line;
 
 char* substr(const char *src, int m, int n);
+void printExpr(const Node*);
 
 %}
 
@@ -49,6 +50,8 @@ char* substr(const char *src, int m, int n);
 %type <node> expr;
 %type<node> operation;
 %type<node> setStmt;
+%type<node> condition;
+
 
 %%
 prog:		'[' stmtlst ']'
@@ -62,18 +65,7 @@ stmt:		setStmt
 			| print 
 			| unaryOperation 
 			| expr {
-				if($1->thisNodeType == ERR){
-					printf("Type mismatch on %i\n",line);
-				}
-				else if($1->thisNodeType == INT){
-					printf("Result of expression on %i is (%i)\n",line,$1->exprNodePtr->inum);
-				}
-				else if($1->thisNodeType == DBL){
-					printf("Result of expression on %i is (%g)\n",line,$1->exprNodePtr->dnum);
-				}
-				else if($1->thisNodeType == STR){
-					printf("Result of expression on %i is (%s)\n",line,$1->exprNodePtr->sval);
-				}
+				printExpr($1);
 			}
 			| returnStmt 
 ;
@@ -84,19 +76,7 @@ getExpr:	'[' tGET ',' tIDENT ',' '[' exprList ']' ']'
 ;
 
 setStmt:	'[' tSET ',' tIDENT ',' expr ']' {
-
-			if($6->thisNodeType == ERR){
-					printf("Type mismatch on %i\n",line);
-				}
-				else if($6->thisNodeType == INT){
-					printf("Result of expression on %i is (%i)\n",line,$6->exprNodePtr->inum);
-				}
-				else if($6->thisNodeType == DBL){
-					printf("Result of expression on %i is (%g)\n",line,$6->exprNodePtr->dnum);
-				}
-				else if($6->thisNodeType == STR){
-					printf("Result of expression on %i is (%s)\n",line,$6->exprNodePtr->sval);
-				}
+	printExpr($6);
 }
 ;
 
@@ -110,9 +90,17 @@ print:		'[' tPRINT ',' '[' expr ']' ']'
 
 
 operation:	'[' tADD ',' expr ',' expr ']' {
+
+
 	if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				$$ = node;}
+
+	else if($4->thisNodeType == CHK || $6->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				$$ = node;}
 
@@ -191,6 +179,7 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 
 	}
 	else{
+
 			Node * node = (Node *) malloc(sizeof(Node));
 
 			node->thisNodeType = ERR;
@@ -203,6 +192,12 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 			if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				$$ = node;}
+
+				else if($4->thisNodeType == CHK || $6->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				$$ = node;}
 				
@@ -279,6 +274,12 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 				node->thisNodeType = GET;
 
 				$$ = node;}
+
+				else if($4->thisNodeType == CHK || $6->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
+
+				$$ = node;}
 			else if($4->thisNodeType == INT && $6->thisNodeType == INT){
 		//printf("operation || int and int found => %i  %i \n",$4->exprNodePtr->inum, $6->exprNodePtr->inum);
 
@@ -340,6 +341,15 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 	else if(($4->thisNodeType == INT && $6->thisNodeType == STR)){
 		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
 
+		if($4->exprNodePtr->inum < 0){
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			$$ = node;
+		}
+else{
+
 		Node * node = (Node *) malloc(sizeof(Node));
 			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
 
@@ -356,6 +366,39 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 			node->thisNodeType = STR;
 
 			$$ = node;
+}
+
+	}
+
+	else if(($4->thisNodeType == STR && $6->thisNodeType == INT)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		if($6->exprNodePtr->inum < 0){
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			$$ = node;
+		}
+else{
+
+		Node * node = (Node *) malloc(sizeof(Node));
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+
+			int i;
+			char* str = (char*) malloc(sizeof(char));
+
+			for(i = 0; i < $6->exprNodePtr->inum; i++){
+				str = strcat(str, $4->exprNodePtr->sval);;
+			} 
+
+			exprnode->sval = str;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = STR;
+
+			$$ = node;
+}
 
 	}
 
@@ -371,6 +414,12 @@ operation:	'[' tADD ',' expr ',' expr ']' {
 			if($4->thisNodeType == GET || $6->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				$$ = node;}
+				
+				else if($4->thisNodeType == CHK || $6->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				$$ = node;}
 			else if($4->thisNodeType == INT && $6->thisNodeType == INT){
@@ -507,14 +556,29 @@ function:	 '[' tFUNCTION ',' '[' parametersList ']' ',' '[' stmtlst ']' ']'
 		| '[' tFUNCTION ',' '[' ']' ',' '[' stmtlst ']' ']'
 ;
 
-condition:	'[' tEQUALITY ',' expr ',' expr ']'
-		| '[' tGT ',' expr ',' expr ']'
-		| '[' tLT ',' expr ',' expr ']'
-		| '[' tGEQ ',' expr ',' expr ']'
-		| '[' tLEQ ',' expr ',' expr ']'
+condition:	'[' tEQUALITY ',' expr ',' expr ']' {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												$$ = node;
+												}
+		| '[' tGT ',' expr ',' expr ']' {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												$$ = node;
+												}
+		| '[' tLT ',' expr ',' expr ']' {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												$$ = node;
+												}
+		| '[' tGEQ ',' expr ',' expr ']' {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												$$ = node;
+												}
+		| '[' tLEQ ',' expr ',' expr ']' {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												$$ = node;
+												}
 ;
 
-returnStmt:	'[' tRETURN ',' expr ']'
+returnStmt:	'[' tRETURN ',' expr ']'{ printExpr($4);}
 		| '[' tRETURN ']'
 ;
 
@@ -539,6 +603,21 @@ char* substr(const char *src, int m, int n)
     }
     *dest = '\0';
     return dest - len;
+}
+
+void printExpr(const Node* node){
+	if(node->thisNodeType == ERR){
+					printf("Type mismatch on %i\n",line);
+				}
+				else if(node->thisNodeType == INT){
+					printf("Result of expression on %i is (%i)\n",line,node->exprNodePtr->inum);
+				}
+				else if(node->thisNodeType == DBL){
+					printf("Result of expression on %i is (%.1f)\n",line,node->exprNodePtr->dnum);
+				}
+				else if(node->thisNodeType == STR){
+					printf("Result of expression on %i is (%s)\n",line,node->exprNodePtr->sval);
+				}
 }
 
 int main ()

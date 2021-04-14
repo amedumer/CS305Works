@@ -74,7 +74,7 @@
 void yyerror (const char *s) 
 {}
 
-typedef enum { STR, INT, DBL, ERR ,GET} itemType;
+typedef enum { STR, INT, DBL, ERR ,GET, CHK} itemType;
 
 typedef union 
 {
@@ -95,9 +95,10 @@ typedef struct Node
 extern int line;
 
 char* substr(const char *src, int m, int n);
+void printExpr(const Node*);
 
 
-#line 101 "parser.tab.c" /* yacc.c:339  */
+#line 102 "parser.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -160,14 +161,14 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 36 "parser.y" /* yacc.c:355  */
+#line 37 "parser.y" /* yacc.c:355  */
 
 	struct Node * node;
 	char* num;
 	char* str;
 
 
-#line 171 "parser.tab.c" /* yacc.c:355  */
+#line 172 "parser.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -184,7 +185,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 188 "parser.tab.c" /* yacc.c:358  */
+#line 189 "parser.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -483,11 +484,11 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    54,    54,    57,    57,    60,    61,    62,    63,    64,
-      78,    81,    82,    83,    86,   103,   104,   107,   112,   202,
-     276,   370,   448,   449,   452,   481,   492,   501,   501,   503,
-     506,   507,   510,   511,   512,   513,   514,   517,   518,   521,
-     521,   524,   524
+       0,    57,    57,    60,    60,    63,    64,    65,    66,    67,
+      70,    73,    74,    75,    78,    83,    84,    87,    92,   191,
+     271,   413,   497,   498,   501,   530,   541,   550,   550,   552,
+     555,   556,   559,   563,   567,   571,   575,   581,   582,   585,
+     585,   588,   588
 };
 #endif
 
@@ -1343,50 +1344,35 @@ yyreduce:
   switch (yyn)
     {
         case 9:
-#line 64 "parser.y" /* yacc.c:1646  */
+#line 67 "parser.y" /* yacc.c:1646  */
     {
-				if((yyvsp[0].node)->thisNodeType == ERR){
-					printf("Type mismatch on %i\n",line);
-				}
-				else if((yyvsp[0].node)->thisNodeType == INT){
-					printf("Result of expression on %i is (%i)\n",line,(yyvsp[0].node)->exprNodePtr->inum);
-				}
-				else if((yyvsp[0].node)->thisNodeType == DBL){
-					printf("Result of expression on %i is (%g)\n",line,(yyvsp[0].node)->exprNodePtr->dnum);
-				}
-				else if((yyvsp[0].node)->thisNodeType == STR){
-					printf("Result of expression on %i is (%s)\n",line,(yyvsp[0].node)->exprNodePtr->sval);
-				}
+				printExpr((yyvsp[0].node));
 			}
-#line 1362 "parser.tab.c" /* yacc.c:1646  */
+#line 1352 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 86 "parser.y" /* yacc.c:1646  */
+#line 78 "parser.y" /* yacc.c:1646  */
     {
-
-			if((yyvsp[-1].node)->thisNodeType == ERR){
-					printf("Type mismatch on %i\n",line);
-				}
-				else if((yyvsp[-1].node)->thisNodeType == INT){
-					printf("Result of expression on %i is (%i)\n",line,(yyvsp[-1].node)->exprNodePtr->inum);
-				}
-				else if((yyvsp[-1].node)->thisNodeType == DBL){
-					printf("Result of expression on %i is (%g)\n",line,(yyvsp[-1].node)->exprNodePtr->dnum);
-				}
-				else if((yyvsp[-1].node)->thisNodeType == STR){
-					printf("Result of expression on %i is (%s)\n",line,(yyvsp[-1].node)->exprNodePtr->sval);
-				}
+	printExpr((yyvsp[-1].node));
 }
-#line 1382 "parser.tab.c" /* yacc.c:1646  */
+#line 1360 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 112 "parser.y" /* yacc.c:1646  */
+#line 92 "parser.y" /* yacc.c:1646  */
     {
+
+
 	if((yyvsp[-3].node)->thisNodeType == GET || (yyvsp[-1].node)->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				(yyval.node) = node;}
+
+	else if((yyvsp[-3].node)->thisNodeType == CHK || (yyvsp[-1].node)->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				(yyval.node) = node;}
 
@@ -1465,6 +1451,7 @@ yyreduce:
 
 	}
 	else{
+
 			Node * node = (Node *) malloc(sizeof(Node));
 
 			node->thisNodeType = ERR;
@@ -1473,15 +1460,21 @@ yyreduce:
 	}
 	
 }
-#line 1477 "parser.tab.c" /* yacc.c:1646  */
+#line 1464 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 202 "parser.y" /* yacc.c:1646  */
+#line 191 "parser.y" /* yacc.c:1646  */
     {
 			if((yyvsp[-3].node)->thisNodeType == GET || (yyvsp[-1].node)->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				(yyval.node) = node;}
+
+				else if((yyvsp[-3].node)->thisNodeType == CHK || (yyvsp[-1].node)->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				(yyval.node) = node;}
 				
@@ -1552,15 +1545,21 @@ yyreduce:
 			(yyval.node) = node;
 	}
 		}
-#line 1556 "parser.tab.c" /* yacc.c:1646  */
+#line 1549 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 276 "parser.y" /* yacc.c:1646  */
+#line 271 "parser.y" /* yacc.c:1646  */
     {
 			if((yyvsp[-3].node)->thisNodeType == GET || (yyvsp[-1].node)->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				(yyval.node) = node;}
+
+				else if((yyvsp[-3].node)->thisNodeType == CHK || (yyvsp[-1].node)->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				(yyval.node) = node;}
 			else if((yyvsp[-3].node)->thisNodeType == INT && (yyvsp[-1].node)->thisNodeType == INT){
@@ -1624,6 +1623,15 @@ yyreduce:
 	else if(((yyvsp[-3].node)->thisNodeType == INT && (yyvsp[-1].node)->thisNodeType == STR)){
 		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
 
+		if((yyvsp[-3].node)->exprNodePtr->inum < 0){
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			(yyval.node) = node;
+		}
+else{
+
 		Node * node = (Node *) malloc(sizeof(Node));
 			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
 
@@ -1640,6 +1648,39 @@ yyreduce:
 			node->thisNodeType = STR;
 
 			(yyval.node) = node;
+}
+
+	}
+
+	else if(((yyvsp[-3].node)->thisNodeType == STR && (yyvsp[-1].node)->thisNodeType == INT)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		if((yyvsp[-1].node)->exprNodePtr->inum < 0){
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			(yyval.node) = node;
+		}
+else{
+
+		Node * node = (Node *) malloc(sizeof(Node));
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+
+			int i;
+			char* str = (char*) malloc(sizeof(char));
+
+			for(i = 0; i < (yyvsp[-1].node)->exprNodePtr->inum; i++){
+				str = strcat(str, (yyvsp[-3].node)->exprNodePtr->sval);;
+			} 
+
+			exprnode->sval = str;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = STR;
+
+			(yyval.node) = node;
+}
 
 	}
 
@@ -1651,15 +1692,21 @@ yyreduce:
 			(yyval.node) = node;
 	}
 		}
-#line 1655 "parser.tab.c" /* yacc.c:1646  */
+#line 1696 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 370 "parser.y" /* yacc.c:1646  */
+#line 413 "parser.y" /* yacc.c:1646  */
     {
 			if((yyvsp[-3].node)->thisNodeType == GET || (yyvsp[-1].node)->thisNodeType == GET){Node * node = (Node *) malloc(sizeof(Node));
 
 				node->thisNodeType = GET;
+
+				(yyval.node) = node;}
+				
+				else if((yyvsp[-3].node)->thisNodeType == CHK || (yyvsp[-1].node)->thisNodeType == CHK){Node * node = (Node *) malloc(sizeof(Node));
+
+				node->thisNodeType = CHK;
 
 				(yyval.node) = node;}
 			else if((yyvsp[-3].node)->thisNodeType == INT && (yyvsp[-1].node)->thisNodeType == INT){
@@ -1730,11 +1777,11 @@ yyreduce:
 			(yyval.node) = node;
 	}
 		}
-#line 1734 "parser.tab.c" /* yacc.c:1646  */
+#line 1781 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 452 "parser.y" /* yacc.c:1646  */
+#line 501 "parser.y" /* yacc.c:1646  */
     {
 
 			char* str = (yyvsp[0].num);
@@ -1764,11 +1811,11 @@ yyreduce:
 			}
 			(yyval.node) = node;
 }
-#line 1768 "parser.tab.c" /* yacc.c:1646  */
+#line 1815 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 481 "parser.y" /* yacc.c:1646  */
+#line 530 "parser.y" /* yacc.c:1646  */
     {
 				Node * node = (Node *) malloc(sizeof(Node));
 
@@ -1780,11 +1827,11 @@ yyreduce:
 
 				(yyval.node) = node;
 			}
-#line 1784 "parser.tab.c" /* yacc.c:1646  */
+#line 1831 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 492 "parser.y" /* yacc.c:1646  */
+#line 541 "parser.y" /* yacc.c:1646  */
     {
 
 				Node * node = (Node *) malloc(sizeof(Node));
@@ -1794,11 +1841,62 @@ yyreduce:
 				(yyval.node) = node;
 
 			}
-#line 1798 "parser.tab.c" /* yacc.c:1646  */
+#line 1845 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 32:
+#line 559 "parser.y" /* yacc.c:1646  */
+    {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												(yyval.node) = node;
+												}
+#line 1854 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 33:
+#line 563 "parser.y" /* yacc.c:1646  */
+    {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												(yyval.node) = node;
+												}
+#line 1863 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 34:
+#line 567 "parser.y" /* yacc.c:1646  */
+    {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												(yyval.node) = node;
+												}
+#line 1872 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 35:
+#line 571 "parser.y" /* yacc.c:1646  */
+    {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												(yyval.node) = node;
+												}
+#line 1881 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 36:
+#line 575 "parser.y" /* yacc.c:1646  */
+    {Node * node = (Node *) malloc(sizeof(Node));
+												node->thisNodeType = CHK;
+												(yyval.node) = node;
+												}
+#line 1890 "parser.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 37:
+#line 581 "parser.y" /* yacc.c:1646  */
+    { printExpr((yyvsp[-1].node));}
+#line 1896 "parser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1802 "parser.tab.c" /* yacc.c:1646  */
+#line 1900 "parser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2026,7 +2124,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 527 "parser.y" /* yacc.c:1906  */
+#line 591 "parser.y" /* yacc.c:1906  */
 
 
 char* substr(const char *src, int m, int n)
@@ -2042,6 +2140,21 @@ char* substr(const char *src, int m, int n)
     }
     *dest = '\0';
     return dest - len;
+}
+
+void printExpr(const Node* node){
+	if(node->thisNodeType == ERR){
+					printf("Type mismatch on %i\n",line);
+				}
+				else if(node->thisNodeType == INT){
+					printf("Result of expression on %i is (%i)\n",line,node->exprNodePtr->inum);
+				}
+				else if(node->thisNodeType == DBL){
+					printf("Result of expression on %i is (%.1f)\n",line,node->exprNodePtr->dnum);
+				}
+				else if(node->thisNodeType == STR){
+					printf("Result of expression on %i is (%s)\n",line,node->exprNodePtr->sval);
+				}
 }
 
 int main ()
