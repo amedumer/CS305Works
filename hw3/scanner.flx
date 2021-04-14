@@ -29,16 +29,11 @@ int line = 1;
 ["][_a-zA-Z][a-zA-Z0-9_]*["]	return tIDENT;
 				
 [0-9]+ |
--[0-9]+ 		{
-                    yylval.isDouble = 0;
-                    yylval.num = atof(yytext);
-                    return tNUM; 
-}
-
+-[0-9]+ |
 [0-9]+"."[0-9]+	|
--[0-9]+"."[0-9]+	{   
-                    yylval.isDouble = 1;        
-                    yylval.num = atof(yytext);
+-[0-9]+"."[0-9]+	{     
+    
+                    yylval.num = yytext;
                     return tNUM; 
                     }
 	

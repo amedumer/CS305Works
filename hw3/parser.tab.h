@@ -73,12 +73,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 30 "parser.y" /* yacc.c:1909  */
+#line 36 "parser.y" /* yacc.c:1909  */
 
 	struct Node * node;
-	double num;
+	char* num;
 	char* str;
-	int isDouble;
+
 
 #line 84 "parser.tab.h" /* yacc.c:1909  */
 };

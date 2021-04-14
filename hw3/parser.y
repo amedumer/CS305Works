@@ -1,19 +1,24 @@
 %{
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 // {printf("Result of expression on %d is (%d)\n",line,$$);} 
 void yyerror (const char *s) 
 {}
 
-typedef enum { STR, INT, DBL } itemType;
+typedef enum { STR, INT, DBL, ERR } itemType;
 
 typedef union 
 {
     int inum;
-    double dnum;
+    float dnum;
     char* sval;
 } exprNode ;
+
+
 
 typedef struct Node
 {
@@ -25,13 +30,14 @@ typedef struct Node
 extern int line;
 
 char* substr(const char *src, int m, int n);
+
 %}
 
 %union {
 	struct Node * node;
-	double num;
+	char* num;
 	char* str;
-	int isDouble;
+
 }
 
 %token tADD tNUM tSUB tMUL tDIV tSTRING tPRINT tGET tSET tFUNCTION tRETURN tIDENT tEQUALITY tIF tGT tLT tGEQ tLEQ tINC tDEC
@@ -41,6 +47,7 @@ char* substr(const char *src, int m, int n);
 %type <num> tNUM;
 %type <str> tSTRING;
 %type <node> expr;
+%type<node> operation;
 
 %%
 prog:		'[' stmtlst ']'
@@ -53,7 +60,20 @@ stmt:		setStmt
 			| if 
 			| print 
 			| unaryOperation 
-			| expr 
+			| expr {
+				if($1->thisNodeType == ERR){
+					printf("Type mismatch on %i\n",line);
+				}
+				else if($1->thisNodeType == INT){
+					printf("Result of expression on %i is (%i)\n",line,$1->exprNodePtr->inum);
+				}
+				else if($1->thisNodeType == DBL){
+					printf("Result of expression on %i is (%g)\n",line,$1->exprNodePtr->dnum);
+				}
+				else if($1->thisNodeType == STR){
+					printf("Result of expression on %i is (%s)\n",line,$1->exprNodePtr->sval);
+				}
+			}
 			| returnStmt 
 ;
 
@@ -75,18 +95,89 @@ print:		'[' tPRINT ',' '[' expr ']' ']'
 
 
 operation:	'[' tADD ',' expr ',' expr ']' {
+
 	if($4->thisNodeType == INT && $6->thisNodeType == INT){
-		printf("two integers found%d\n",2);
-/*
+		//printf("operation || int and int found => %i  %i \n",$4->exprNodePtr->inum, $6->exprNodePtr->inum);
+
 		Node * node = (Node *) malloc(sizeof(Node));
 
 			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
-			exprnode->inum = $4->exprNodePtr->inum + ;
+			exprnode->inum = $4->exprNodePtr->inum + $6->exprNodePtr->inum;
 
 			node->exprNodePtr = exprnode;
 			node->thisNodeType = INT;
-*/
+
+			$$ = node;
+
 	}
+
+	else if($4->thisNodeType == DBL && $6->thisNodeType == DBL){
+		//printf("operation || dbl and dbl found => %g  %g \n",$4->exprNodePtr->dnum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum + $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+
+	else if(($4->thisNodeType == DBL && $6->thisNodeType == INT)){
+		//printf("operation || dbl and int found => %f  %i \n",$4->exprNodePtr->dnum, $6->exprNodePtr->inum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->dnum + $6->exprNodePtr->inum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	else if(($4->thisNodeType == INT && $6->thisNodeType == DBL)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+			exprnode->dnum = $4->exprNodePtr->inum + $6->exprNodePtr->dnum;
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = DBL;
+
+			$$ = node;
+
+	}
+	else if(($4->thisNodeType == STR && $6->thisNodeType == STR)){
+		//printf("operation || int and dbl found => %i  %f \n",$4->exprNodePtr->inum, $6->exprNodePtr->dnum);
+
+		Node * node = (Node *) malloc(sizeof(Node));
+
+			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
+
+			exprnode->sval =strcat($4->exprNodePtr->sval, $6->exprNodePtr->sval);
+
+
+			node->exprNodePtr = exprnode;
+			node->thisNodeType = STR;
+
+			$$ = node;
+
+	}
+	else{
+			Node * node = (Node *) malloc(sizeof(Node));
+
+			node->thisNodeType = ERR;
+
+			$$ = node;
+	}
+	
 }
 		| '[' tSUB ',' expr ',' expr ']' 
 		| '[' tMUL ',' expr ',' expr ']' 
@@ -101,22 +192,30 @@ unaryOperation: '[' tINC ',' tIDENT ']'
 
 expr:		tNUM {
 
+			char* str = $1;
 			Node * node = (Node *) malloc(sizeof(Node));
-
 			exprNode * exprnode = (exprNode *) malloc((sizeof(exprNode)));
 
-			int converted = $1;
-			if ($1 - converted == 0){
-				printf("%f ahahaahaha\n",$1);
-				exprnode->inum = $1;
+			//printf("expression found: %s\n",str);
+
+			int i,isDouble = 0;
+			for(i = 0; i < strlen(str); i++){
+				if(str[i] == '.'){
+					isDouble = 1;
+					break;
+				}
+			}
+
+			if (isDouble == 1){
+				exprnode->dnum = strtof($1,NULL);
 				node->exprNodePtr = exprnode;
-				node->thisNodeType = INT;
+				node->thisNodeType = DBL;
 
 			}
 			else{
-				exprnode->dnum = $1;
+				exprnode->inum = atoi($1);
 				node->exprNodePtr = exprnode;
-				node->thisNodeType = DBL;
+				node->thisNodeType = INT;
 			}
 			$$ = node;
 }
@@ -131,7 +230,9 @@ expr:		tNUM {
 
 				$$ = node;
 			}
-			| getExpr | function | operation| condition
+			| getExpr | function | operation
+			
+				| condition
 ;
 
 function:	 '[' tFUNCTION ',' '[' parametersList ']' ',' '[' stmtlst ']' ']'
