@@ -1,9 +1,10 @@
 %{
-#include "hw3-???????.tab.h" 
+#include "parser.tab.h" 
+int line = 1;
 %}
 %%
 
-['][^']*[']		return tSTRING;
+['][^']*[']		{yylval.str = yytext; return tSTRING;}
 
 ["]Get["]		return tGET;
 ["]Set["]		return tSET;
@@ -28,11 +29,21 @@
 ["][_a-zA-Z][a-zA-Z0-9_]*["]	return tIDENT;
 				
 [0-9]+ |
--[0-9]+ |		
+-[0-9]+ 		{
+                    yylval.isDouble = 0;
+                    yylval.num = atof(yytext);
+                    return tNUM; 
+}
+
 [0-9]+"."[0-9]+	|
--[0-9]+"."[0-9]+	return tNUM; 
+-[0-9]+"."[0-9]+	{   
+                    yylval.isDouble = 1;        
+                    yylval.num = atof(yytext);
+                    return tNUM; 
+                    }
 	
-[ \t\n]+ 
+[ \t]+ 
+"\n" line++;
 .			return yytext[0];
 
 %%
