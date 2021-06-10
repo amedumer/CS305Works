@@ -1,3 +1,0 @@
-[
-	["Print", ['This is a function to print hello world on screen!']]   
-]

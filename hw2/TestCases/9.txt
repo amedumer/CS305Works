@@ -1,9 +1,0 @@
-[
-	["Set", "X", ["Get","PrintHelloWorld",[] ] ]
-	["Set","X", 1]
-	["Set","X", 1]
-
-    ["Set","X", 'Test']
-
-    ["Set","X", ["Function", [], []] ]
-]
